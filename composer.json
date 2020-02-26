@@ -1,0 +1,12 @@
+{
+    "require": {
+        "ramsey/uuid": "^3.9",
+        "eventsauce/eventsauce": "^0.8.0",
+        "slim/slim": "4.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}

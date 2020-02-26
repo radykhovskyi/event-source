@@ -1,0 +1,11 @@
+version: "3"
+services:
+  app:
+    image: webdevops/php-nginx:7.4
+    ports:
+      - 8000:80
+    volumes:
+      - ./:/app
+
+volumes:
+  mysql:
