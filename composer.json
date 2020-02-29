@@ -2,7 +2,14 @@
     "require": {
         "ramsey/uuid": "^3.9",
         "eventsauce/eventsauce": "^0.8.0",
-        "slim/slim": "4.*"
+        "slim/slim": "4.*",
+        "larapack/dd": "^1.1",
+        "slim/psr7": "^1.0",
+        "league/tactician": "^1.0",
+        "pimple/pimple": "~3.0",
+        "eventsauce/doctrine-message-repository": "^0.8.0",
+        "ext-json": "*",
+        "php-di/slim-bridge": "^3.0"
     },
     "autoload": {
         "psr-4": {
