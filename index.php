@@ -3,8 +3,10 @@
 use App\Actions\CreateLampAction;
 use App\Actions\GetLampAction;
 use App\Actions\UpdateLampAction;
+use App\Commands\GetLampQuery;
 use App\Commands\InstallLampCommand;
 use App\Commands\UpdateLampCommand;
+use App\Handlers\GetLampHandler;
 use App\Handlers\InstallLampHandler;
 use App\Handlers\UpdateLampHandler;
 use App\Http\Middlewares\JsonBodyParserMiddleware;
@@ -16,12 +18,14 @@ use Slim\Factory\AppFactory;
 
 require __DIR__ . '/vendor/autoload.php';
 
-set_exception_handler(fn (Throwable $exception) => dd($exception));
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 set_error_handler(
     function ($severity, $message, $file, $line) {
         throw new ErrorException($message, $severity, $severity, $file, $line);
     }
 );
+set_exception_handler(fn (Throwable $exception) => dd($exception));
 
 $container = new \Pimple\Container();
 AppFactory::setContainer(new \Pimple\PSR11\Container($container));
@@ -48,8 +52,11 @@ $repository = new ConstructingAggregateRootRepository(
 );
 $commandBus = League\Tactician\Setup\QuickStart::create(
     [
+        // commands
         InstallLampCommand::class => new InstallLampHandler($repository),
         UpdateLampCommand::class => new UpdateLampHandler($repository),
+        // queries
+        GetLampQuery::class => new GetLampHandler($repository),
     ]
 );
 $container['command_bus'] = $commandBus;

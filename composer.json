@@ -8,8 +8,7 @@
         "league/tactician": "^1.0",
         "pimple/pimple": "~3.0",
         "eventsauce/doctrine-message-repository": "^0.8.0",
-        "ext-json": "*",
-        "php-di/slim-bridge": "^3.0"
+        "ext-json": "*"
     },
     "autoload": {
         "psr-4": {
