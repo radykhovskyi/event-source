@@ -11,12 +11,17 @@ use EventSauce\EventSourcing\UuidAggregateRootId;
 class LampInstalled implements SerializablePayload
 {
     private string $location;
-    private AggregateRootId $uid;
+    private AggregateRootId $id;
 
-    public function __construct(AggregateRootId $uid, $location)
+    public function __construct(AggregateRootId $id, $location)
     {
-        $this->uid = $uid;
+        $this->id = $id;
         $this->location = $location;
+    }
+
+    public function id(): AggregateRootId
+    {
+        return $this->id;
     }
 
     public function location(): string
@@ -27,13 +32,13 @@ class LampInstalled implements SerializablePayload
     public function toPayload(): array
     {
         return [
-            'uid' => $this->uid->toString(),
+            'id' => $this->id->toString(),
             'location' => $this->location
         ];
     }
 
     public static function fromPayload(array $payload): SerializablePayload
     {
-        return new self(UuidAggregateRootId::fromString($payload['uid']), $payload['location']);
+        return new self(UuidAggregateRootId::fromString($payload['id']), $payload['location']);
     }
 }

@@ -17,7 +17,7 @@ class InstallLampHandler
         $this->repository = $repository;
     }
 
-    public function handle(InstallLampCommand $command)
+    public function handle(InstallLampCommand $command): Lamp
     {
         $lamp = Lamp::install($command->location());
         $this->repository->persist($lamp);

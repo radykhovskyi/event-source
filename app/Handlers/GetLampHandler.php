@@ -6,23 +6,31 @@ namespace App\Handlers;
 
 use App\Commands\GetLampQuery;
 use App\Exceptions\LampNotFoundException;
-use EventSauce\EventSourcing\AggregateRootRepository;
+use App\Models\Lamp;
+use Doctrine\DBAL\Connection;
+use EventSauce\EventSourcing\UuidAggregateRootId;
 
 class GetLampHandler
 {
-    private AggregateRootRepository $repository;
+    private Connection $db;
 
-    public function __construct(AggregateRootRepository $repository)
+    public function __construct(Connection $connection)
     {
-        $this->repository = $repository;
+        $this->db = $connection;
     }
 
-    public function handle(GetLampQuery $query)
+    /**
+     * @param GetLampQuery $query
+     * @return Lamp
+     *
+     * @throws LampNotFoundException
+     */
+    public function handle(GetLampQuery $query): Lamp
     {
-        $lamp = $this->repository->retrieve($query->id());
-        if ($lamp->aggregateRootVersion() === 0) {
+        $data = $this->db->fetchAssoc('SELECT * FROM `lamps` WHERE `aggregate_root_id` = ?', [$query->id()->toString()]);
+        if ($data === false) {
             throw new LampNotFoundException($query->id());
         }
-        return $lamp;
+        return Lamp::populate(UuidAggregateRootId::fromString($data['aggregate_root_id']), $data['state'], $data['location']);
     }
 }

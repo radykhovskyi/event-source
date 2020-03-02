@@ -14,6 +14,7 @@ use App\Models\Lamp;
 use Doctrine\DBAL\DriverManager;
 use EventSauce\EventSourcing\ConstructingAggregateRootRepository;
 use EventSauce\EventSourcing\Serialization\ConstructingMessageSerializer;
+use EventSauce\EventSourcing\SynchronousMessageDispatcher;
 use Slim\Factory\AppFactory;
 
 require __DIR__ . '/vendor/autoload.php';
@@ -34,21 +35,26 @@ $app->addMiddleware(new JsonBodyParserMiddleware());
 
 $config = require_once __DIR__ . '/config/app.php';
 
+$doctrineConnection = DriverManager::getConnection([
+    'dbname' => $config['db']['database'],
+    'user' => $config['db']['username'],
+    'password' => $config['db']['password'],
+    'host' => $config['db']['host'],
+    'driver' => 'pdo_mysql',
+    'strict' => false,
+]);
 $messageRepository = new EventSauce\DoctrineMessageRepository\DoctrineMessageRepository(
-    DriverManager::getConnection([
-        'dbname' => $config['db']['database'],
-        'user' => $config['db']['username'],
-        'password' => $config['db']['password'],
-        'host' => $config['db']['host'],
-        'driver' => 'pdo_mysql',
-        'strict' => false,
-    ]),
+    $doctrineConnection,
     new ConstructingMessageSerializer(),
     'event_log'
 );
+$messageDispatcher = new SynchronousMessageDispatcher(
+    new \App\Consumers\LampProjection($doctrineConnection),
+);
 $repository = new ConstructingAggregateRootRepository(
     Lamp::class,
-    $messageRepository
+    $messageRepository,
+    $messageDispatcher
 );
 $commandBus = League\Tactician\Setup\QuickStart::create(
     [
@@ -56,7 +62,7 @@ $commandBus = League\Tactician\Setup\QuickStart::create(
         InstallLampCommand::class => new InstallLampHandler($repository),
         UpdateLampCommand::class => new UpdateLampHandler($repository),
         // queries
-        GetLampQuery::class => new GetLampHandler($repository),
+        GetLampQuery::class => new GetLampHandler($doctrineConnection),
     ]
 );
 $container['command_bus'] = $commandBus;

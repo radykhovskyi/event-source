@@ -8,8 +8,6 @@ use App\Commands\UpdateLampCommand;
 use App\Exceptions\LampNotFoundException;
 use App\Models\Lamp;
 use EventSauce\EventSourcing\AggregateRootRepository;
-use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Exception\HttpNotFoundException;
 
 class UpdateLampHandler
 {
@@ -20,7 +18,13 @@ class UpdateLampHandler
         $this->repository = $repository;
     }
 
-    public function handle(UpdateLampCommand $command)
+    /**
+     * @param UpdateLampCommand $command
+     * @return Lamp
+     *
+     * @throws LampNotFoundException
+     */
+    public function handle(UpdateLampCommand $command): Lamp
     {
         /** @var \App\Models\Lamp $lamp */
         $lamp = $this->repository->retrieve($command->id());

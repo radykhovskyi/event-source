@@ -10,6 +10,7 @@ use App\Events\LampTurnedOff;
 use App\Events\LampTurnedOn;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
+use EventSauce\EventSourcing\AggregateRootId;
 use EventSauce\EventSourcing\UuidAggregateRootId;
 
 class Lamp implements AggregateRoot
@@ -30,21 +31,29 @@ class Lamp implements AggregateRoot
         return $process;
     }
 
+    public static function populate(AggregateRootId $id, string $state, string $location): self
+    {
+        $model = new self($id);
+        $model->state = $state;
+        $model->location = $location;
+        return $model;
+    }
+
     public function turnOff(): Lamp
     {
-        $this->recordThat(new LampTurnedOff());
+        $this->recordThat(new LampTurnedOff($this->aggregateRootId));
         return $this;
     }
 
     public function turnOn(): Lamp
     {
-        $this->recordThat(new LampTurnedOn());
+        $this->recordThat(new LampTurnedOn($this->aggregateRootId));
         return $this;
     }
 
     public function changeLocation(string $location)
     {
-        $this->recordThat(new LampLocationChanged($location));
+        $this->recordThat(new LampLocationChanged($this->aggregateRootId, $location));
         return $this;
     }
 
